@@ -38,7 +38,7 @@ public class StatsClient {
         return webClient.get()
                 .uri("/stats")
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<ViewStats>>() {
+                .bodyToMono(new ParameterizedTypeReference<>() {
                 });
     }
 

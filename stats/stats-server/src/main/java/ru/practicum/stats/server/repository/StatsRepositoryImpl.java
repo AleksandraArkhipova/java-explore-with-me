@@ -4,7 +4,9 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
 import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.server.mapper.ViewStatsMapper;
@@ -17,9 +19,10 @@ import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StatsRepositoryImpl implements StatsRepositoryCustom {
-    private final EntityManager entityManager;
-    private final ViewStatsMapper viewStatsMapper;
+    EntityManager entityManager;
+    ViewStatsMapper viewStatsMapper;
 
     @Override
     public List<ViewStats> getStatisticsByUris(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {

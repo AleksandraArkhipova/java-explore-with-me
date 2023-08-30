@@ -1,5 +1,7 @@
 package ru.practicum.stats.server.controller;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.stats.dto.CreateEndpointHitDto;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.ViewStats;
@@ -19,8 +21,9 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StatsController {
-    private final StatsService statsService;
+    StatsService statsService;
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
