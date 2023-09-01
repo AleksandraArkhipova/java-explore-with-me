@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.stats.dto.CreateEndpointHitDto;
 import ru.practicum.stats.dto.EndpointHitDto;
+import ru.practicum.stats.dto.StatsDto;
 import ru.practicum.stats.dto.ViewStats;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import ru.practicum.stats.server.service.StatsService;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +40,12 @@ public class StatsController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {
-        return statsService.getStatistics(start, end, uris, unique);
+
+        return statsService.getStatistics(new StatsDto().builder()
+                .start(start)
+                .end(end)
+                .uris(Optional.ofNullable(uris))
+                .unique(unique)
+                .build());
     }
 }

@@ -8,12 +8,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
+import ru.practicum.stats.dto.StatsDto;
 import ru.practicum.stats.dto.ViewStats;
 import ru.practicum.stats.server.mapper.ViewStatsMapper;
 import ru.practicum.stats.server.model.QEndpointHit;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,16 +25,17 @@ public class StatsRepositoryImpl implements StatsRepositoryCustom {
     ViewStatsMapper viewStatsMapper;
 
     @Override
-    public List<ViewStats> getStatisticsByUris(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+    public List<ViewStats> getStatisticsByUris(StatsDto statsDto) {
         QEndpointHit hit = QEndpointHit.endpointHit;
-        BooleanExpression whereExpr = hit.timestamp.between(start, end);
+        BooleanExpression whereExpr = hit.timestamp.between(statsDto.getStart(), statsDto.getEnd());
 
-        if (uris != null && !uris.isEmpty()) {
+        if (statsDto.getUris().isPresent()) {
+            List<String> uris = statsDto.getUris().get();
             whereExpr = whereExpr.and(hit.uri.in(uris));
         }
 
         return new JPAQuery<Tuple>(entityManager)
-                .select(hit.app, hit.uri, unique ? hit.ip.countDistinct() : Expressions.ONE.count())
+                .select(hit.app, hit.uri, statsDto.getUnique() ? hit.ip.countDistinct() : Expressions.ONE.count())
                 .from(hit)
                 .where(whereExpr)
                 .groupBy(hit.app, hit.uri)
