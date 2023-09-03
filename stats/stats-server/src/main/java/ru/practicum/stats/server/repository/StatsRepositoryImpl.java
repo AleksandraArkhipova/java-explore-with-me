@@ -27,17 +27,17 @@ public class StatsRepositoryImpl implements StatsRepositoryCustom {
     @Override
     public List<ViewStats> getStatisticsByUris(StatsDto statsDto) {
         QEndpointHit hit = QEndpointHit.endpointHit;
-        BooleanExpression whereExpr = hit.timestamp.between(statsDto.getStart(), statsDto.getEnd());
+        BooleanExpression where = hit.timestamp.between(statsDto.getStart(), statsDto.getEnd());
 
         if (statsDto.getUris().isPresent()) {
             List<String> uris = statsDto.getUris().get();
-            whereExpr = whereExpr.and(hit.uri.in(uris));
+            where = where.and(hit.uri.in(uris));
         }
 
         return new JPAQuery<Tuple>(entityManager)
                 .select(hit.app, hit.uri, statsDto.getUnique() ? hit.ip.countDistinct() : Expressions.ONE.count())
                 .from(hit)
-                .where(whereExpr)
+                .where(where)
                 .groupBy(hit.app, hit.uri)
                 .orderBy(Expressions.THREE.desc())
                 .stream()
