@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 @Component
 public class EventUtils {
     public static final ObjectMapper objectMapper = new ObjectMapper();
