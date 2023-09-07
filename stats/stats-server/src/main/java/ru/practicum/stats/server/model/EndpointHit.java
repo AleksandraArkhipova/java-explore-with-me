@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Builder
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "hit")
