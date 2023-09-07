@@ -72,7 +72,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
             where = where.and(event.category.id.in(dto.getCategoryIds()));
         }
 
-        if (dto.getRangeEnd() == null && dto.getRangeEnd() == null) {
+        if (dto.getRangeStart() == null && dto.getRangeEnd() == null) {
             where = where.and(event.eventDate.after(LocalDateTime.now()));
         }
 
