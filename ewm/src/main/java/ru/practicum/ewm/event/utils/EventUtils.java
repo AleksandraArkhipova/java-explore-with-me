@@ -2,6 +2,7 @@ package ru.practicum.ewm.event.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.repository.RequestRepository;
@@ -15,21 +16,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+@Component
 public class EventUtils {
     public static final ObjectMapper objectMapper = new ObjectMapper();
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    StatsClient statsClient;
+    RequestRepository requestRepository;
 
-    public static void addViewsAndConfirmedRequestsToEvents(
-            List<EventDto> events,
-            StatsClient statsClient,
-            RequestRepository requestRepository
+    public void addViewsAndConfirmedRequestsToEvents(
+            List<EventDto> events
     ) {
-        addViewsToEvents(events, statsClient);
-        addConfirmedRequests(events, requestRepository);
+        addViewsToEvents(events);
+        addConfirmedRequests(events);
     }
 
-    public static void addViewsToEvents(List<EventDto> events, StatsClient statsClient) {
+    public void addViewsToEvents(List<EventDto> events) {
         Map<String, EventDto> eventsMap = events
                 .stream()
                 .collect(Collectors.toMap(event -> "/events/" + event.getId(), event -> event));
@@ -41,7 +42,8 @@ public class EventUtils {
                 false
         ).getBody();
 
-        List<ViewStats> statistics = objectMapper.convertValue(rawStatistics, new TypeReference<>() {});
+        List<ViewStats> statistics = objectMapper.convertValue(rawStatistics, new TypeReference<>() {
+        });
 
         statistics.forEach(statistic -> {
             if (eventsMap.containsKey(statistic.getUri())) {
@@ -50,7 +52,7 @@ public class EventUtils {
         });
     }
 
-    public static void addConfirmedRequests(List<EventDto> events, RequestRepository requestRepository) {
+    public void addConfirmedRequests(List<EventDto> events) {
         Map<Long, Long> requestsCountMap = new HashMap<>();
 
         List<Request> requests = requestRepository.findAllConfirmedByEventIdIn(events

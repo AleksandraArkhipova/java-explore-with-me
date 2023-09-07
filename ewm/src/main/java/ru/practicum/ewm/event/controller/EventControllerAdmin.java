@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.event.dto.EventDto;
+import ru.practicum.ewm.event.dto.GetEventAdminDto;
 import ru.practicum.ewm.event.dto.UpdateEventAdminDto;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.service.EventServiceAdmin;
@@ -41,18 +42,19 @@ public class EventControllerAdmin {
             @Positive @RequestParam(defaultValue = "10") int size
     ) {
         return eventService.getAllEvents(
-                userIds,
+                new GetEventAdminDto(userIds,
                 states,
                 categoryIds,
                 rangeStart,
                 rangeEnd,
                 from,
-                size
+                size)
         );
     }
 
     @PatchMapping("/{eventId}")
-    public EventDto moderateEvent(@PathVariable long eventId, @Valid @RequestBody UpdateEventAdminDto updateEventDto) {
+    public EventDto moderateEvent(
+            @PathVariable long eventId, @Valid @RequestBody UpdateEventAdminDto updateEventDto) {
         return eventService.moderateEvent(eventId, updateEventDto);
     }
 }

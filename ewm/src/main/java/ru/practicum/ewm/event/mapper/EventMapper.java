@@ -18,7 +18,7 @@ public interface EventMapper {
     @Mapping(target = "location.lon", source = "longitude")
     EventDto eventToEventDto(Event event);
 
-    EventShortDto eventToEventShortDto(Event event);
+    EventShortDto toEventShortDto(Event event);
 
-    EventShortDto eventDtoToEventShortDto(EventDto eventDto);
+    EventShortDto toEventShortDto(EventDto eventDto);
 }

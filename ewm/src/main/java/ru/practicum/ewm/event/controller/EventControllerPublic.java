@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.GetEventDto;
 import ru.practicum.ewm.event.model.EventSort;
 import ru.practicum.ewm.event.service.EventServicePublic;
 
@@ -41,16 +42,16 @@ public class EventControllerPublic {
             @Positive @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request
     ) {
-        return eventService.getAllEvents(
-                text,
-                categoryIds,
-                paid,
-                rangeStart,
-                rangeEnd,
-                onlyAvailable,
-                sort,
-                from,
-                size,
+        return eventService.getAllEvents(new GetEventDto(
+                        text,
+                        categoryIds,
+                        paid,
+                        rangeStart,
+                        rangeEnd,
+                        onlyAvailable,
+                        sort,
+                        from,
+                        size),
                 request
         );
     }

@@ -9,6 +9,7 @@ import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.core.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.EventDto;
+import ru.practicum.ewm.event.dto.GetEventAdminDto;
 import ru.practicum.ewm.event.dto.UpdateEventAdminDto;
 import ru.practicum.ewm.core.exception.ConflictException;
 import ru.practicum.ewm.event.mapper.EventMapper;
@@ -17,10 +18,7 @@ import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.model.EventStateAdminAction;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.event.utils.EventUtils;
-import ru.practicum.ewm.request.repository.RequestRepository;
-import ru.practicum.stats.client.StatsClient;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,27 +28,20 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class EventServiceAdmin {
     EventRepository eventRepository;
-    RequestRepository requestRepository;
     CategoryRepository categoryRepository;
     EventMapper eventMapper;
-    StatsClient statsClient;
+    EventUtils utils;
 
     public List<EventDto> getAllEvents(
-            List<Long> userIds,
-            List<EventState> states,
-            List<Long> categoryIds,
-            LocalDateTime rangeStart,
-            LocalDateTime rangeEnd,
-            int from,
-            int size
+            GetEventAdminDto eventAdminDto
     ) {
         List<EventDto> eventDtos = eventRepository
-                .findAllByAdminFilters(userIds, states, categoryIds, rangeStart, rangeEnd, from, size)
+                .findAllByAdminFilters(eventAdminDto)
                 .stream()
                 .map(eventMapper::eventToEventDto)
                 .collect(Collectors.toList());
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos, statsClient, requestRepository);
+        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos;
     }
@@ -106,7 +97,7 @@ public class EventServiceAdmin {
 
         EventDto eventDto = eventMapper.eventToEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto), statsClient, requestRepository);
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }

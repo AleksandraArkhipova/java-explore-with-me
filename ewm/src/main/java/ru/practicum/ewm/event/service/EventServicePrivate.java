@@ -29,7 +29,6 @@ import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
-import ru.practicum.stats.client.StatsClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class EventServicePrivate {
     RequestRepository requestRepository;
     EventMapper eventMapper;
     RequestMapper requestMapper;
-    StatsClient statsClient;
+    EventUtils utils;
 
     public List<EventShortDto> getAllEvents(long userId, Pageable pageable) {
         List<EventDto> eventDtos = eventRepository
@@ -57,11 +56,11 @@ public class EventServicePrivate {
                 .map(eventMapper::eventToEventDto)
                 .collect(Collectors.toList());
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos, statsClient, requestRepository);
+        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos
                 .stream()
-                .map(eventMapper::eventDtoToEventShortDto)
+                .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
     }
 
@@ -75,7 +74,7 @@ public class EventServicePrivate {
 
         EventDto eventDto = eventMapper.eventToEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto), statsClient, requestRepository);
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }
@@ -155,7 +154,7 @@ public class EventServicePrivate {
 
         EventDto eventDto = eventMapper.eventToEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto), statsClient, requestRepository);
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }

@@ -8,9 +8,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Repository;
+import ru.practicum.ewm.event.dto.GetEventAdminDto;
+import ru.practicum.ewm.event.dto.GetEventDto;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.EventSort;
-import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.event.model.QEvent;
 
 import javax.persistence.EntityManager;
@@ -26,92 +27,79 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 
     @Override
     public List<Event> findAllByAdminFilters(
-            List<Long> userIds,
-            List<EventState> states,
-            List<Long> categoryIds,
-            LocalDateTime rangeStart,
-            LocalDateTime rangeEnd,
-            int from,
-            int size
+            GetEventAdminDto dto
     ) {
         QEvent event = QEvent.event;
         BooleanExpression where = Expressions.asBoolean(true).isTrue();
 
-        if (rangeStart != null && rangeEnd != null) {
-            where = where.and(event.eventDate.between(rangeStart, rangeEnd));
+        if (dto.getRangeStart() != null && dto.getRangeEnd() != null) {
+            where = where.and(event.eventDate.between(dto.getRangeStart(), dto.getRangeEnd()));
         }
 
-        if (userIds != null && !userIds.isEmpty()) {
-            where = where.and(event.initiator.id.in(userIds));
+        if (dto.getUserIds() != null && !dto.getUserIds().isEmpty()) {
+            where = where.and(event.initiator.id.in(dto.getUserIds()));
         }
 
-        if (states != null && !states.isEmpty()) {
-            where = where.and(event.state.in(states));
+        if (dto.getStates() != null && !dto.getStates().isEmpty()) {
+            where = where.and(event.state.in(dto.getStates()));
         }
 
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            where = where.and(event.category.id.in(categoryIds));
+        if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
+            where = where.and(event.category.id.in(dto.getCategoryIds()));
         }
 
         return new JPAQuery<Event>(entityManager)
                 .from(event)
                 .where(where)
-                .offset(from)
-                .limit(size)
+                .offset(dto.getFrom())
+                .limit(dto.getSize())
                 .stream()
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> findAllByPublicFilters(
-            String text,
-            List<Long> categoryIds,
-            Boolean paid,
-            LocalDateTime rangeStart,
-            LocalDateTime rangeEnd,
-            EventSort sort,
-            int from,
-            int size
+            GetEventDto dto
     ) {
         QEvent event = QEvent.event;
         BooleanExpression where = Expressions.asBoolean(true).isTrue();
 
-        if (text != null && !text.isBlank()) {
-            where = where.and(event.annotation.containsIgnoreCase(text).or(event.description.containsIgnoreCase(text)));
+        if (dto.getText() != null && !dto.getText().isBlank()) {
+            where = where.and(event.annotation.containsIgnoreCase(dto.getText()).or(event.description.containsIgnoreCase(dto.getText())));
         }
 
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            where = where.and(event.category.id.in(categoryIds));
+        if (dto.getCategoryIds() != null && !dto.getCategoryIds().isEmpty()) {
+            where = where.and(event.category.id.in(dto.getCategoryIds()));
         }
 
-        if (rangeStart == null && rangeEnd == null) {
+        if (dto.getRangeEnd() == null && dto.getRangeEnd() == null) {
             where = where.and(event.eventDate.after(LocalDateTime.now()));
         }
 
-        if (rangeStart != null) {
-            where = where.and(event.eventDate.after(rangeStart));
+        if (dto.getRangeStart() != null) {
+            where = where.and(event.eventDate.after(dto.getRangeStart()));
         }
 
-        if (rangeEnd != null) {
-            where = where.and(event.eventDate.before(rangeEnd));
+        if (dto.getRangeEnd() != null) {
+            where = where.and(event.eventDate.before(dto.getRangeEnd()));
         }
 
-        if (paid != null) {
-            where = where.and(event.paid.eq(paid));
+        if (dto.getPaid() != null) {
+            where = where.and(event.paid.eq(dto.getPaid()));
         }
 
         OrderSpecifier orderBy = event.id.asc();
 
-        if (sort == EventSort.EVENT_DATE) {
+        if (dto.getSort() == EventSort.EVENT_DATE) {
             orderBy = event.eventDate.desc();
         }
 
         return new JPAQuery<Event>(entityManager)
                 .from(event)
                 .where(where)
-                .offset(from)
+                .offset(dto.getFrom())
                 .orderBy(orderBy)
-                .limit(size)
+                .limit(dto.getSize())
                 .stream()
                 .collect(Collectors.toList());
     }
