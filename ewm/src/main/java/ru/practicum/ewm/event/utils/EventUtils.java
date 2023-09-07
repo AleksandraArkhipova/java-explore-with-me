@@ -2,6 +2,8 @@ package ru.practicum.ewm.event.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.request.model.Request;
@@ -18,11 +20,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true)
 public class EventUtils {
-    public static final ObjectMapper objectMapper = new ObjectMapper();
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    StatsClient statsClient;
-    RequestRepository requestRepository;
+    public static ObjectMapper objectMapper = new ObjectMapper();
+    public static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private StatsClient statsClient;
+    private RequestRepository requestRepository;
 
     public void addViewsAndConfirmedRequestsToEvents(
             List<EventDto> events
