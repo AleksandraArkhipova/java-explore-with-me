@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.ewm.core.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.dto.GetEventAdminDto;
@@ -19,6 +20,7 @@ import ru.practicum.ewm.event.model.EventStateAdminAction;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.event.utils.EventUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,22 +49,28 @@ public class EventServiceAdmin {
     }
 
     @Transactional
-    public EventDto moderateEvent(long eventId, UpdateEventAdminDto updateEventDto) {
+    public EventDto moderateEvent(long eventId, UpdateEventAdminDto dto) {
+
+        if (dto.getEventDate() != null) {
+            if (dto.getEventDate().isBefore(LocalDateTime.now())) {
+                throw new FieldValidationException("EventDate", "eventDate should be in the future");
+            }
+        }
         Event event = checkEvent(eventId);
 
-        eventMapper.updateEvent(event, updateEventDto);
+        eventMapper.updateEvent(event, dto);
 
-        if (updateEventDto.getCategory() != null) {
-            Category category = checkCategory(updateEventDto.getCategory());
+        if (dto.getCategory() != null) {
+            Category category = checkCategory(dto.getCategory());
             event.setCategory(category);
         }
 
-        if (updateEventDto.getStateAction() != null) {
+        if (dto.getStateAction() != null) {
             if (event.getState() != EventState.PENDING) {
                 throw new ConflictException();
             }
 
-            EventState newState = updateEventDto.getStateAction() == EventStateAdminAction.PUBLISH_EVENT
+            EventState newState = dto.getStateAction() == EventStateAdminAction.PUBLISH_EVENT
                     ? EventState.PUBLISHED
                     : EventState.CANCELED;
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.ewm.core.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
@@ -80,12 +81,16 @@ public class EventServicePrivate {
     }
 
     @Transactional
-    public EventDto createEvent(long userId, CreateEventDto createEventDto) {
+    public EventDto createEvent(long userId, CreateEventDto dto) {
         User user = checkUser(userId);
-        Category category = checkCategory(createEventDto.getCategory());
+        Category category = checkCategory(dto.getCategory());
 
-        Event event = eventMapper.createEventDtoToEvent(createEventDto);
-
+        Event event = eventMapper.createEventDtoToEvent(dto);
+        if (dto.getEventDate() != null) {
+            if (event.getEventDate().isBefore(LocalDateTime.now())) {
+                throw new FieldValidationException("EventDate", "eventDate should be in the future");
+            }
+        }
         event.setInitiator(user);
         event.setCategory(category);
         event.setState(EventState.PENDING);
@@ -95,10 +100,15 @@ public class EventServicePrivate {
     }
 
     @Transactional
-    public EventDto updateEvent(long userId, long eventId, UpdateEventUserDto updateEventUserDto) {
+    public EventDto updateEvent(long userId, long eventId, UpdateEventUserDto dto) {
+
         checkUser(userId);
         Event event = checkEvent(eventId);
-
+        if (dto.getEventDate() != null) {
+            if (event.getEventDate().isBefore(LocalDateTime.now())) {
+                throw new FieldValidationException("EventDate", "eventDate should be in the future");
+            }
+        }
         if (event.getInitiator().getId() != userId) {
             throw new NotFoundException("event", eventId);
         }
@@ -107,15 +117,15 @@ public class EventServicePrivate {
             throw new ConflictException();
         }
 
-        eventMapper.updateEvent(event, updateEventUserDto);
+        eventMapper.updateEvent(event, dto);
 
-        if (updateEventUserDto.getCategory() != null) {
-            Category category = checkCategory(updateEventUserDto.getCategory());
+        if (dto.getCategory() != null) {
+            Category category = checkCategory(dto.getCategory());
             event.setCategory(category);
         }
 
-        if (updateEventUserDto.getStateAction() != null) {
-            EventState newState = updateEventUserDto.getStateAction() == EventStateUserAction.SEND_TO_REVIEW
+        if (dto.getStateAction() != null) {
+            EventState newState = dto.getStateAction() == EventStateUserAction.SEND_TO_REVIEW
                     ? EventState.PENDING
                     : EventState.CANCELED;
             event.setState(newState);

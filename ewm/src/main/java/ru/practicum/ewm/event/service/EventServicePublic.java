@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.ewm.core.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
@@ -37,6 +38,13 @@ public class EventServicePublic {
             GetEventDto dto,
             HttpServletRequest request
     ) {
+
+        if (dto.getRangeStart() != null && dto.getRangeEnd() != null) {
+            if (dto.getRangeStart().isAfter(dto.getRangeEnd())) {
+                throw new FieldValidationException("RangeStart", "rangeStart must be before RangeEnd");
+            }
+        }
+
         sendStatistics(request);
 
         List<EventDto> events = eventRepository
