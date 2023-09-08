@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true)
 public class EventUtils {
-    public static ObjectMapper objectMapper = new ObjectMapper();
-    public static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final ObjectMapper objectMapper = new ObjectMapper();
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private StatsClient statsClient;
     private RequestRepository requestRepository;
 
