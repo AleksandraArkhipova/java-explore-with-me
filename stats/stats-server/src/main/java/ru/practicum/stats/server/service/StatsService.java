@@ -32,7 +32,7 @@ public class StatsService {
     }
 
     public List<ViewStats> getStatistics(StatsDto statsDto) {
-        if (statsDto.isStartCorrect()) {
+        if (statsDto.getStart().isAfter(statsDto.getEnd())) {
             throw new ValidationException("Start must be before RangeEnd");
         }
 
