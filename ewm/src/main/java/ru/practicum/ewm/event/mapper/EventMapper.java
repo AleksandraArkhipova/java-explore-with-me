@@ -12,11 +12,11 @@ public interface EventMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "latitude", source = "location.lat")
     @Mapping(target = "longitude", source = "location.lon")
-    Event createEventDtoToEvent(CreateEventDto createEventDto);
+    Event toEvent(CreateEventDto createEventDto);
 
     @Mapping(target = "location.lat", source = "latitude")
     @Mapping(target = "location.lon", source = "longitude")
-    EventDto eventToEventDto(Event event);
+    EventDto toEventDto(Event event);
 
     EventShortDto toEventShortDto(EventDto eventDto);
 

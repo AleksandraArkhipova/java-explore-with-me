@@ -32,13 +32,11 @@ public class EventServicePublic {
     EventRepository eventRepository;
     EventMapper eventMapper;
     StatsClient statsClient;
-    EventUtils utils;
 
     public List<EventShortDto> getAllEvents(
             GetEventDto dto,
             HttpServletRequest request
     ) {
-
         if (dto.getRangeStart() != null && dto.getRangeEnd() != null) {
             if (dto.getRangeStart().isAfter(dto.getRangeEnd())) {
                 throw new FieldValidationException("RangeStart", "rangeStart must be before RangeEnd");
@@ -50,7 +48,7 @@ public class EventServicePublic {
         List<EventDto> events = eventRepository
                 .findAllByPublicFilters(dto)
                 .stream()
-                .map(eventMapper::eventToEventDto)
+                .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
         if (dto.getOnlyAvailable()) {
@@ -63,7 +61,7 @@ public class EventServicePublic {
             events.sort((event1, event2) -> Long.compare(event2.getViews(), event1.getViews()));
         }
 
-        utils.addViewsAndConfirmedRequestsToEvents(events);
+        EventUtils.addViewsAndConfirmedRequestsToEvents(events);
 
         return events
                 .stream()
@@ -80,9 +78,9 @@ public class EventServicePublic {
             throw new NotFoundException("event", eventId);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
-        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }

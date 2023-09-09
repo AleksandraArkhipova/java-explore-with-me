@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
-import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.ewm.core.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.event.dto.GetEventAdminDto;
@@ -20,7 +19,6 @@ import ru.practicum.ewm.event.model.EventStateAdminAction;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.event.utils.EventUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +30,6 @@ public class EventServiceAdmin {
     EventRepository eventRepository;
     CategoryRepository categoryRepository;
     EventMapper eventMapper;
-    EventUtils utils;
 
     public List<EventDto> getAllEvents(
             GetEventAdminDto eventAdminDto
@@ -40,10 +37,10 @@ public class EventServiceAdmin {
         List<EventDto> eventDtos = eventRepository
                 .findAllByAdminFilters(eventAdminDto)
                 .stream()
-                .map(eventMapper::eventToEventDto)
+                .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
-        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
+        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos;
     }
@@ -51,11 +48,6 @@ public class EventServiceAdmin {
     @Transactional
     public EventDto moderateEvent(long eventId, UpdateEventAdminDto dto) {
 
-        if (dto.getEventDate() != null) {
-            if (dto.getEventDate().isBefore(LocalDateTime.now())) {
-                throw new FieldValidationException("EventDate", "eventDate should be in the future");
-            }
-        }
         Event event = checkEvent(eventId);
 
         eventMapper.updateEvent(event, dto);
@@ -77,9 +69,9 @@ public class EventServiceAdmin {
             event.setState(newState);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
-        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }

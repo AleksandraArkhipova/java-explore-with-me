@@ -2,8 +2,10 @@ package ru.practicum.ewm.event.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.event.dto.EventDto;
 import ru.practicum.ewm.request.model.Request;
@@ -21,21 +23,27 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true)
+@FieldDefaults(level = AccessLevel.PUBLIC)
 public class EventUtils {
     public static final ObjectMapper objectMapper = new ObjectMapper();
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private StatsClient statsClient;
-    private RequestRepository requestRepository;
+    static StatsClient statsClient;
+    static RequestRepository requestRepository;
 
-    public void addViewsAndConfirmedRequestsToEvents(
+    @Autowired
+    public void setBeans(StatsClient client, RequestRepository requestRepo) {
+        statsClient = client;
+        requestRepository = requestRepo;
+    }
+
+    public static void addViewsAndConfirmedRequestsToEvents(
             List<EventDto> events
     ) {
         addViewsToEvents(events);
         addConfirmedRequests(events);
     }
 
-    public void addViewsToEvents(List<EventDto> events) {
+    public static void addViewsToEvents(List<EventDto> events) {
         Map<String, EventDto> eventsMap = events
                 .stream()
                 .collect(Collectors.toMap(event -> "/events/" + event.getId(), event -> event));
@@ -57,7 +65,7 @@ public class EventUtils {
         });
     }
 
-    public void addConfirmedRequests(List<EventDto> events) {
+    public static void addConfirmedRequests(List<EventDto> events) {
         Map<Long, Long> requestsCountMap = new HashMap<>();
 
         List<Request> requests = requestRepository.findAllConfirmedByEventIdIn(events

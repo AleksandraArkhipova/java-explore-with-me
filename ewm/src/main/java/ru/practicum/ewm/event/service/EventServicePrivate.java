@@ -48,16 +48,15 @@ public class EventServicePrivate {
     RequestRepository requestRepository;
     EventMapper eventMapper;
     RequestMapper requestMapper;
-    EventUtils utils;
 
     public List<EventShortDto> getAllEvents(long userId, Pageable pageable) {
         List<EventDto> eventDtos = eventRepository
                 .findAllByInitiatorId(userId, pageable)
                 .stream()
-                .map(eventMapper::eventToEventDto)
+                .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
-        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
+        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos
                 .stream()
@@ -73,9 +72,9 @@ public class EventServicePrivate {
             throw new NotFoundException("event", eventId);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
-        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }
@@ -85,7 +84,7 @@ public class EventServicePrivate {
         User user = checkUser(userId);
         Category category = checkCategory(dto.getCategory());
 
-        Event event = eventMapper.createEventDtoToEvent(dto);
+        Event event = eventMapper.toEvent(dto);
         if (dto.getEventDate() != null) {
             if (event.getEventDate().isBefore(LocalDateTime.now())) {
                 throw new FieldValidationException("EventDate", "eventDate should be in the future");
@@ -96,7 +95,7 @@ public class EventServicePrivate {
         event.setState(EventState.PENDING);
         event.setCreatedOn(LocalDateTime.now());
 
-        return eventMapper.eventToEventDto(eventRepository.save(event));
+        return eventMapper.toEventDto(eventRepository.save(event));
     }
 
     @Transactional
@@ -104,11 +103,7 @@ public class EventServicePrivate {
 
         checkUser(userId);
         Event event = checkEvent(eventId);
-        if (dto.getEventDate() != null) {
-            if (event.getEventDate().isBefore(LocalDateTime.now())) {
-                throw new FieldValidationException("EventDate", "eventDate should be in the future");
-            }
-        }
+
         if (event.getInitiator().getId() != userId) {
             throw new NotFoundException("event", eventId);
         }
@@ -131,9 +126,9 @@ public class EventServicePrivate {
             event.setState(newState);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
-        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }
