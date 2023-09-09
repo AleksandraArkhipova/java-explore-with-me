@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import javax.validation.constraints.AssertTrue;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +26,13 @@ public class StatsDto {
     Optional<List<String>> uris;
 
     Boolean unique;
+
+    @AssertTrue(message = "Start must be before RangeEnd")
+    public boolean isStartCorrect() {
+        if (this.getStart().isAfter(this.getEnd())) {
+            return false;
+        }
+        return true;
+    }
+
 }

@@ -1,9 +1,10 @@
 package ru.practicum.stats.server.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.stats.dto.CreateEndpointHitDto;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.StatsDto;
@@ -12,14 +13,16 @@ import ru.practicum.stats.server.mapper.EndpointHitMapper;
 import ru.practicum.stats.server.model.EndpointHit;
 import ru.practicum.stats.server.repository.StatsRepository;
 
+import javax.validation.ValidationException;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class StatsService {
-    private final StatsRepository statsRepository;
-    private final EndpointHitMapper endpointHitMapper;
+    StatsRepository statsRepository;
+    EndpointHitMapper endpointHitMapper;
 
     @Transactional
     public EndpointHitDto saveEndpointHit(CreateEndpointHitDto createEndpointHitDto) {
@@ -29,10 +32,9 @@ public class StatsService {
     }
 
     public List<ViewStats> getStatistics(StatsDto statsDto) {
-            if (statsDto.getStart().isAfter(statsDto.getEnd())) {
-                throw new FieldValidationException("Start", "Start must be before RangeEnd");
-            }
-
+        if (statsDto.isStartCorrect()) {
+            throw new ValidationException("Start must be before RangeEnd");
+        }
 
         return statsRepository.getStatisticsByUris(statsDto);
     }
