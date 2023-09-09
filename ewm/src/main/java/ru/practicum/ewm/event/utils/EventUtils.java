@@ -3,7 +3,6 @@ package ru.practicum.ewm.event.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PUBLIC)
 public class EventUtils {
     public static final ObjectMapper objectMapper = new ObjectMapper();
@@ -31,7 +29,7 @@ public class EventUtils {
     static RequestRepository requestRepository;
 
     @Autowired
-    public void setBeans(StatsClient client, RequestRepository requestRepo) {
+    public EventUtils(StatsClient client, RequestRepository requestRepo) {
         statsClient = client;
         requestRepository = requestRepo;
     }
@@ -48,6 +46,8 @@ public class EventUtils {
                 .stream()
                 .collect(Collectors.toMap(event -> "/events/" + event.getId(), event -> event));
 
+        eventsMap.values().forEach(event -> event.setViews(0));
+
         Object rawStatistics = statsClient.getStatistics(
                 LocalDateTime.parse("2000-01-01 00:00:00", FORMATTER).format(FORMATTER),
                 LocalDateTime.parse("5000-01-01 00:00:00", FORMATTER).format(FORMATTER),
@@ -60,6 +60,7 @@ public class EventUtils {
 
         statistics.forEach(statistic -> {
             if (eventsMap.containsKey(statistic.getUri())) {
+                eventsMap.get(statistic.getUri()).setViews(0L);
                 eventsMap.get(statistic.getUri()).setViews(statistic.getHits());
             }
         });

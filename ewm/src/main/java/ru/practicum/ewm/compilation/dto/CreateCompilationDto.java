@@ -16,7 +16,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateCompilationDto {
     @NotBlank
-    @Size(max = 50)
+    @Size(min = 1, max = 50)
     String title;
 
     List<Long> events;

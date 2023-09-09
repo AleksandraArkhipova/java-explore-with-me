@@ -45,25 +45,25 @@ public class EventServicePublic {
 
         sendStatistics(request);
 
-        List<EventDto> events = eventRepository
+        List<EventDto> eventDtos = eventRepository
                 .findAllByPublicFilters(dto)
                 .stream()
                 .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
         if (dto.getOnlyAvailable()) {
-            events = events.stream()
+            eventDtos = eventDtos.stream()
                     .filter(event -> event.getParticipantLimit() <= event.getConfirmedRequests())
                     .collect(Collectors.toList());
         }
 
         if (dto.getSort() == EventSort.VIEWS) {
-            events.sort((event1, event2) -> Long.compare(event2.getViews(), event1.getViews()));
+            eventDtos.sort((event1, event2) -> Long.compare(event2.getViews(), event1.getViews()));
         }
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(events);
+        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
-        return events
+        return eventDtos
                 .stream()
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
