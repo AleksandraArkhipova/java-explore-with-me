@@ -45,7 +45,7 @@ public class EventUtils {
                 LocalDateTime.parse("2000-01-01 00:00:00", FORMATTER).format(FORMATTER),
                 LocalDateTime.parse("5000-01-01 00:00:00", FORMATTER).format(FORMATTER),
                 new ArrayList<>(eventsMap.keySet()),
-                false
+                true
         ).getBody();
 
         List<ViewStats> statistics = objectMapper.convertValue(rawStatistics, new TypeReference<>() {

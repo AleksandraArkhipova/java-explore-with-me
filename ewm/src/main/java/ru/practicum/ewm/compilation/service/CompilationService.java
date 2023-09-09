@@ -17,6 +17,7 @@ import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -55,9 +56,14 @@ public class CompilationService {
     @Transactional
     public CompilationDto createCompilation(CreateCompilationDto createCompilationDto) {
         Compilation compilation = compilationMapper.createCompilationDtoToCompilation(createCompilationDto);
+        boolean ifPresentEvents = Optional.ofNullable(createCompilationDto.getEvents()).isPresent();
 
-        Set<Event> events = eventRepository.findAllByIdIn(createCompilationDto.getEvents());
-
+        Set<Event> events;
+        if (ifPresentEvents) {
+            events = eventRepository.findAllByIdIn(createCompilationDto.getEvents());
+        } else {
+            events = Set.of();
+        }
         compilation.setEvents(events);
 
         return compilationMapper.compilationToCompilationDto(compilationRepository.save(compilation));
