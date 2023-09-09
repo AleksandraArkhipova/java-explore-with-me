@@ -9,11 +9,11 @@ import ru.practicum.stats.dto.CreateEndpointHitDto;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.StatsDto;
 import ru.practicum.stats.dto.ViewStats;
+import ru.practicum.stats.server.core.exception.FieldValidationException;
 import ru.practicum.stats.server.mapper.EndpointHitMapper;
 import ru.practicum.stats.server.model.EndpointHit;
 import ru.practicum.stats.server.repository.StatsRepository;
 
-import javax.validation.ValidationException;
 import java.util.List;
 
 @Service
@@ -33,7 +33,7 @@ public class StatsService {
 
     public List<ViewStats> getStatistics(StatsDto statsDto) {
         if (statsDto.getStart().isAfter(statsDto.getEnd())) {
-            throw new ValidationException("Start must be before RangeEnd");
+            throw new FieldValidationException("Start", "Start must be before End");
         }
 
         return statsRepository.getStatisticsByUris(statsDto);
