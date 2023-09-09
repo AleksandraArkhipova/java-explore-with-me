@@ -3,6 +3,7 @@ package ru.practicum.stats.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.stats.dto.CreateEndpointHitDto;
 import ru.practicum.stats.dto.EndpointHitDto;
 import ru.practicum.stats.dto.StatsDto;
@@ -28,6 +29,11 @@ public class StatsService {
     }
 
     public List<ViewStats> getStatistics(StatsDto statsDto) {
+            if (statsDto.getStart().isAfter(statsDto.getEnd())) {
+                throw new FieldValidationException("Start", "Start must be before RangeEnd");
+            }
+
+
         return statsRepository.getStatisticsByUris(statsDto);
     }
 }
