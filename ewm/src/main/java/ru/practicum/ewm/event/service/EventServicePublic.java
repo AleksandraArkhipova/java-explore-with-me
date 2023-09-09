@@ -32,6 +32,7 @@ public class EventServicePublic {
     EventRepository eventRepository;
     EventMapper eventMapper;
     StatsClient statsClient;
+    EventUtils utils;
 
     public List<EventShortDto> getAllEvents(
             GetEventDto dto,
@@ -61,7 +62,7 @@ public class EventServicePublic {
             eventDtos.sort((event1, event2) -> Long.compare(event2.getViews(), event1.getViews()));
         }
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos);
+        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos
                 .stream()
@@ -80,7 +81,7 @@ public class EventServicePublic {
 
         EventDto eventDto = eventMapper.toEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }

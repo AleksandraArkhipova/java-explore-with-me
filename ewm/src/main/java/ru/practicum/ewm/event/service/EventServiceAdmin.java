@@ -30,6 +30,7 @@ public class EventServiceAdmin {
     EventRepository eventRepository;
     CategoryRepository categoryRepository;
     EventMapper eventMapper;
+    EventUtils utils;
 
     public List<EventDto> getAllEvents(
             GetEventAdminDto eventAdminDto
@@ -40,7 +41,7 @@ public class EventServiceAdmin {
                 .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos);
+        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos;
     }
@@ -71,7 +72,7 @@ public class EventServiceAdmin {
 
         EventDto eventDto = eventMapper.toEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }

@@ -48,6 +48,7 @@ public class EventServicePrivate {
     RequestRepository requestRepository;
     EventMapper eventMapper;
     RequestMapper requestMapper;
+    EventUtils utils;
 
     public List<EventShortDto> getAllEvents(long userId, Pageable pageable) {
         List<EventDto> eventDtos = eventRepository
@@ -56,7 +57,7 @@ public class EventServicePrivate {
                 .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(eventDtos);
+        utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
 
         return eventDtos
                 .stream()
@@ -74,7 +75,7 @@ public class EventServicePrivate {
 
         EventDto eventDto = eventMapper.toEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }
@@ -128,7 +129,7 @@ public class EventServicePrivate {
 
         EventDto eventDto = eventMapper.toEventDto(event);
 
-        EventUtils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
+        utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
         return eventDto;
     }
