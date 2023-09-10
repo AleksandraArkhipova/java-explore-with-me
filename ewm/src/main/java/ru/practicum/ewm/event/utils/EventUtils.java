@@ -2,6 +2,7 @@ package ru.practicum.ewm.event.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
@@ -21,12 +22,12 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true)
+@FieldDefaults(level = AccessLevel.PUBLIC)
 public class EventUtils {
-    public static ObjectMapper objectMapper = new ObjectMapper();
-    public static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private StatsClient statsClient;
-    private RequestRepository requestRepository;
+    public static final ObjectMapper objectMapper = new ObjectMapper();
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final StatsClient statsClient;
+    private final RequestRepository requestRepository;
 
     public void addViewsAndConfirmedRequestsToEvents(
             List<EventDto> events
@@ -44,7 +45,7 @@ public class EventUtils {
                 LocalDateTime.parse("2000-01-01 00:00:00", FORMATTER).format(FORMATTER),
                 LocalDateTime.parse("5000-01-01 00:00:00", FORMATTER).format(FORMATTER),
                 new ArrayList<>(eventsMap.keySet()),
-                false
+                true
         ).getBody();
 
         List<ViewStats> statistics = objectMapper.convertValue(rawStatistics, new TypeReference<>() {

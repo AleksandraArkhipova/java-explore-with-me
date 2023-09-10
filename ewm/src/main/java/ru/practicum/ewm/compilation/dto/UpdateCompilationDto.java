@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateCompilationDto {
-    @Size(max = 120)
+    @Size(min = 1, max = 50)
     String title;
 
     Boolean pinned;

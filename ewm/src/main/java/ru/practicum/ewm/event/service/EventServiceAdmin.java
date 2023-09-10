@@ -38,7 +38,7 @@ public class EventServiceAdmin {
         List<EventDto> eventDtos = eventRepository
                 .findAllByAdminFilters(eventAdminDto)
                 .stream()
-                .map(eventMapper::eventToEventDto)
+                .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
         utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
@@ -47,55 +47,30 @@ public class EventServiceAdmin {
     }
 
     @Transactional
-    public EventDto moderateEvent(long eventId, UpdateEventAdminDto updateEventDto) {
+    public EventDto moderateEvent(long eventId, UpdateEventAdminDto dto) {
+
         Event event = checkEvent(eventId);
 
-        if (updateEventDto.getAnnotation() != null) {
-            event.setAnnotation(updateEventDto.getAnnotation());
-        }
+        eventMapper.updateEvent(event, dto);
 
-        if (updateEventDto.getCategory() != null) {
-            Category category = checkCategory(updateEventDto.getCategory());
+        if (dto.getCategory() != null) {
+            Category category = checkCategory(dto.getCategory());
             event.setCategory(category);
         }
 
-        if (updateEventDto.getTitle() != null) {
-            event.setTitle(updateEventDto.getTitle());
-        }
-
-        if (updateEventDto.getDescription() != null) {
-            event.setDescription(updateEventDto.getDescription());
-        }
-
-        if (updateEventDto.getEventDate() != null) {
-            event.setEventDate(updateEventDto.getEventDate());
-        }
-
-        if (updateEventDto.getPaid() != null) {
-            event.setPaid(updateEventDto.getPaid());
-        }
-
-        if (updateEventDto.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventDto.getParticipantLimit());
-        }
-
-        if (updateEventDto.getRequestModeration() != null) {
-            event.setRequestModeration(updateEventDto.getRequestModeration());
-        }
-
-        if (updateEventDto.getStateAction() != null) {
+        if (dto.getStateAction() != null) {
             if (event.getState() != EventState.PENDING) {
                 throw new ConflictException();
             }
 
-            EventState newState = updateEventDto.getStateAction() == EventStateAdminAction.PUBLISH_EVENT
+            EventState newState = dto.getStateAction() == EventStateAdminAction.PUBLISH_EVENT
                     ? EventState.PUBLISHED
                     : EventState.CANCELED;
 
             event.setState(newState);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
         utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 

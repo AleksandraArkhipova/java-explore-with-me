@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.core.exception.FieldValidationException;
 import ru.practicum.ewm.core.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.EventRequestStatusUpdateResultDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
@@ -53,7 +54,7 @@ public class EventServicePrivate {
         List<EventDto> eventDtos = eventRepository
                 .findAllByInitiatorId(userId, pageable)
                 .stream()
-                .map(eventMapper::eventToEventDto)
+                .map(eventMapper::toEventDto)
                 .collect(Collectors.toList());
 
         utils.addViewsAndConfirmedRequestsToEvents(eventDtos);
@@ -72,7 +73,7 @@ public class EventServicePrivate {
             throw new NotFoundException("event", eventId);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
         utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 
@@ -80,22 +81,27 @@ public class EventServicePrivate {
     }
 
     @Transactional
-    public EventDto createEvent(long userId, CreateEventDto createEventDto) {
+    public EventDto createEvent(long userId, CreateEventDto dto) {
         User user = checkUser(userId);
-        Category category = checkCategory(createEventDto.getCategory());
+        Category category = checkCategory(dto.getCategory());
 
-        Event event = eventMapper.createEventDtoToEvent(createEventDto);
-
+        Event event = eventMapper.toEvent(dto);
+        if (dto.getEventDate() != null) {
+            if (event.getEventDate().isBefore(LocalDateTime.now())) {
+                throw new FieldValidationException("EventDate", "eventDate should be in the future");
+            }
+        }
         event.setInitiator(user);
         event.setCategory(category);
         event.setState(EventState.PENDING);
         event.setCreatedOn(LocalDateTime.now());
 
-        return eventMapper.eventToEventDto(eventRepository.save(event));
+        return eventMapper.toEventDto(eventRepository.save(event));
     }
 
     @Transactional
-    public EventDto updateEvent(long userId, long eventId, UpdateEventUserDto updateEventUserDto) {
+    public EventDto updateEvent(long userId, long eventId, UpdateEventUserDto dto) {
+
         checkUser(userId);
         Event event = checkEvent(eventId);
 
@@ -107,52 +113,21 @@ public class EventServicePrivate {
             throw new ConflictException();
         }
 
-        if (updateEventUserDto.getAnnotation() != null) {
-            event.setAnnotation(updateEventUserDto.getAnnotation());
-        }
+        eventMapper.updateEvent(event, dto);
 
-        if (updateEventUserDto.getCategory() != null) {
-            Category category = checkCategory(updateEventUserDto.getCategory());
+        if (dto.getCategory() != null) {
+            Category category = checkCategory(dto.getCategory());
             event.setCategory(category);
         }
 
-        if (updateEventUserDto.getTitle() != null) {
-            event.setTitle(updateEventUserDto.getTitle());
-        }
-
-        if (updateEventUserDto.getDescription() != null) {
-            event.setDescription(updateEventUserDto.getDescription());
-        }
-
-        if (updateEventUserDto.getEventDate() != null) {
-            event.setEventDate(updateEventUserDto.getEventDate());
-        }
-
-        if (updateEventUserDto.getLocation() != null) {
-            event.setLatitude(updateEventUserDto.getLocation().getLat());
-            event.setLongitude(updateEventUserDto.getLocation().getLon());
-        }
-
-        if (updateEventUserDto.getPaid() != null) {
-            event.setPaid(updateEventUserDto.getPaid());
-        }
-
-        if (updateEventUserDto.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventUserDto.getParticipantLimit());
-        }
-
-        if (updateEventUserDto.getRequestModeration() != null) {
-            event.setRequestModeration(updateEventUserDto.getRequestModeration());
-        }
-
-        if (updateEventUserDto.getStateAction() != null) {
-            EventState newState = updateEventUserDto.getStateAction() == EventStateUserAction.SEND_TO_REVIEW
+        if (dto.getStateAction() != null) {
+            EventState newState = dto.getStateAction() == EventStateUserAction.SEND_TO_REVIEW
                     ? EventState.PENDING
                     : EventState.CANCELED;
             event.setState(newState);
         }
 
-        EventDto eventDto = eventMapper.eventToEventDto(event);
+        EventDto eventDto = eventMapper.toEventDto(event);
 
         utils.addViewsAndConfirmedRequestsToEvents(List.of(eventDto));
 

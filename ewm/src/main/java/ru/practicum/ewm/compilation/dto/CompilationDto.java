@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.ewm.event.dto.EventDto;
 
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
@@ -14,6 +15,8 @@ import java.util.List;
 public class CompilationDto {
     Long id;
     boolean pinned;
+
+    @Size(max = 50)
     String title;
     List<EventDto> events;
 }

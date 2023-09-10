@@ -33,15 +33,15 @@ public class UserService {
 
         return users
                 .stream()
-                .map(userMapper::userToUserDto)
+                .map(userMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public UserDto createUser(CreateUserDto createUserDto) {
-        User user = userMapper.createUserDtoToUser(createUserDto);
+        User user = userMapper.toUser(createUserDto);
 
-        return userMapper.userToUserDto(userRepository.save(user));
+        return userMapper.toUserDto(userRepository.save(user));
     }
 
     @Transactional

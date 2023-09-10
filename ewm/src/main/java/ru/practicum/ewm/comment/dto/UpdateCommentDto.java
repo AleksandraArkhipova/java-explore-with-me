@@ -1,25 +1,20 @@
-package ru.practicum.ewm.compilation.dto;
+package ru.practicum.ewm.comment.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateCompilationDto {
+public class UpdateCommentDto {
     @NotBlank
-    @Size(min = 1, max = 50)
-    String title;
-
-    List<Long> events;
-
-    boolean pinned;
+    @Size(max = 2000)
+    String text;
 }

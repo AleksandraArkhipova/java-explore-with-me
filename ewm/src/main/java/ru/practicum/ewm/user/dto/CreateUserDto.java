@@ -17,10 +17,10 @@ import javax.validation.constraints.Size;
 public class CreateUserDto {
     @Email
     @NotBlank
-    @Size(max = 50)
+    @Size(min = 6, max = 254, message = "Email should be between 6 and 255 symbols")
     String email;
 
     @NotBlank
-    @Size(max = 50)
+    @Size(min = 2, max = 250, message = "Name should be between 2 and 251 symbols")
     String name;
 }
