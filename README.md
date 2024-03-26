@@ -1,4 +1,2 @@
-# java-explore-with-me
-Template repository for ExploreWithMe project.
-
-[PR] (https://github.com/HoneyVanity/java-explore-with-me/pull/5)
+Microservice REST-project with incoming data validation.
+Stack: Spring Boot, Spring Data JPA, Lombok, Maven, Docker и БД Postgre SQL
